@@ -14,29 +14,37 @@ import java.util.Date;
 @Component
 public class JwtServiceImpl implements JwtService {
 
+    // Autowired instance of ServerConfig for JWT configuration
     @Autowired
     ServerConfig serverConfig;
 
+    // Extract the username from the JWT token
     public String extractUsername(String token){
         return extractClaim(token).getSubject();
     }
 
+    // Extract the user roles from the JWT token
     public String extractRoles(String token){
         return String.valueOf(extractClaim(token).get("roles"));
     }
+
+    // Retrieve the secret key used for signing JWT tokens
     private Key getSignKey() {
         byte[] keyBytes= Decoders.BASE64.decode(serverConfig.getJwtSecret());
         return Keys.hmacShaKeyFor(keyBytes);
     }
 
+    // Check if the JWT token is expired
     private Boolean isTokenExpired(String token) {
         return extractExpiration(token).before(new Date());
     }
 
+    // Extract the expiration date from the JWT token
     public Date extractExpiration(String token) {
         return extractClaim(token).getExpiration();
     }
 
+    // Extract JWT claims from the token
     public Claims extractClaim(String token){
         try {
             return Jwts
@@ -50,6 +58,8 @@ public class JwtServiceImpl implements JwtService {
             throw new RuntimeException(e);
         }
     }
+
+    // Check if the JWT token is valid (not expired)
     public Boolean isValid(String token){
         try {
             extractClaim(token);
